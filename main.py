@@ -33,36 +33,60 @@ def bit_shift(number, n):
     
 def pad(x,y):
     # pad with leading 0 if x/y have different number of bits
-    # e.g., [1,0] vs [1]
     if len(x) < len(y):
-        x = ['0'] * (len(y)-len(x)) + x
+        x = ['0'] * (len(y) - len(x)) + x
+
     elif len(y) < len(x):
-        y = ['0'] * (len(x)-len(y)) + y
+        y = ['0'] * (len(x) - len(y)) + y
     # pad with leading 0 if not even number of bits
     if len(x) % 2 != 0:
         x = ['0'] + x
         y = ['0'] + y
-    return x,y
+    return x, y
+
 
 def quadratic_multiply(x, y):
     # this just converts the result from a BinaryNumber to a regular int
     return _quadratic_multiply(x,y).decimal_val
 
 def _quadratic_multiply(x, y):
-    ### TODO
-    pass
+    xvec = x.binary_vec
+    yvec = y.binary_vec
+    xval = x.decimal_val
+    yval = y.decimal_val
+
+
+    xvec,yvec = pad(xvec, yvec)
+
+    if (xval <= 1) and (yval<=1):
+        return BinaryNumber(xval*yval)
+    else:
+        x_left, x_right = split_number(xvec)
+        y_left, y_right = split_number(yvec)
+        n = len(xvec)
+        xlyl = _quadratic_multiply(x_left, y_left)
+        xlyr = _quadratic_multiply(x_left, y_right)
+        xryl = _quadratic_multiply(x_right, y_left)  # Corrected line
+        xryr = _quadratic_multiply(x_right, y_right)
+        exp = bit_shift(BinaryNumber(2),n)
+        esp2 = bit_shift(BinaryNumber(2),n//2)
+
+        return BinaryNumber(bit_shift(xlyl,n).decimal_val + bit_shift(BinaryNumber(xlyr.decimal_val + xryl.decimal_val),n//2).decimal_val + xryr.decimal_val)
+
     ###
 
 
     
     
-def test_quadratic_multiply(x, y, f):
+def get_test_quadratic_multiply(x,y,f):
     start = time.time()
     # multiply two numbers x, y using function f
-    
+    res = f(x,y)
     return (time.time() - start)*1000
 
+x = BinaryNumber(10)
+y = BinaryNumber(2)
+print(quadratic_multiply(x,y))
 
-    
-    
+print(get_test_quadratic_multiply(x,y,quadratic_multiply))
 
